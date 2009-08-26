@@ -1,7 +1,7 @@
 Name:             jail
 Version:          0.0.1
-Description:      Jailed IO monad for IO computation restricted to parts of the filesystem.
-Synopsis:         Jailed IO monad for IO computation restricted to parts of the filesystem.
+Description:      Jailed IO monad. Run file based IO computations in restricted parts of the filesystem.
+Synopsis:         Jailed IO monad. Run file based IO computations in restricted parts of the filesystem.
 Category:         Sysetm, Security
 Cabal-Version:    >= 1.6
 License:          BSD3

@@ -1,0 +1,17 @@
+Name:             jail
+Version:          0.0.1
+Description:      Jailed IO monad for IO computation restricted to parts of the filesystem.
+Synopsis:         Jailed IO monad for IO computation restricted to parts of the filesystem.
+Category:         Sysetm, Security
+Cabal-Version:    >= 1.6
+License:          BSD3
+License-file:     LICENSE
+Author:           Sebastiaan Visser
+Maintainer:       sfvisser@cs.uu.nl
+Build-Type:       Simple
+Build-Depends:    base, containers ==0.2.*, directory ==1.0.*, monads-fd ==0.0.*
+
+GHC-Options:      -Wall
+HS-Source-Dirs:   src
+Exposed-modules:  System.IO.Jail
+

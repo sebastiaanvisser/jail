@@ -4,6 +4,7 @@ module System.IO.Jail
 
     IO,                        -- instance MonadFix
     run,
+    JailIO (..),
 
     -- * Files and handles
 
@@ -171,12 +172,35 @@ instance Eq HandleS where
 instance Ord HandleS where
   (HandleS s _) `compare` (HandleS t _) = s `compare` t
 
--- The jailed IO monad.
+-- | The jailed IO monad.
 
 newtype IO a = IO { unJail :: ReaderT (Maybe FilePath) (StateT (Set HandleS) U.IO) a}
   deriving (Functor, Applicative, Monad, Typeable, MonadFix)
 
-run :: Maybe FilePath -> [Handle] -> IO a -> U.IO a
+-- | Like `MoandIO`, but for jailed computations.
+
+class Monad m => JailIO m where
+  jailIO :: IO a -> m a
+
+instance JailIO IO where
+  jailIO = id
+
+{- |
+Run a jailed IO computation. The IO computation will be able to access all
+files that are within the specified jail directory. All file accesses outside
+the jail directory will be refused. Only file handles opened from within the
+jailed computation and the handles from the white list will be accessible to
+the operations requiring a file handle. No smuggling in of foreign handles,
+border patrol is very strict. When the jail path is specified as `Nothing' no
+file access will be possible at all, this means the computation can only rely
+on the white listed handles.
+-}
+
+run
+  :: Maybe FilePath  -- ^ The jail directory or `Nothing' for not allowing file access.
+  -> [Handle]        -- ^ A white list of handles that are always accessible.
+  -> IO a            -- ^ The jailed IO computation to run.
+  -> U.IO a          -- ^ Run the computation from within the insecure real world.
 run jail = runRaw jail . Set.fromList . map mkHWrap
 
 runRaw :: Maybe FilePath -> Set HandleS -> IO a -> U.IO a

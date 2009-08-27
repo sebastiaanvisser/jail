@@ -53,7 +53,11 @@ Description:
                   can be trusted by its type alone.
                   .
                   Nonetheless, this module is one step forward in trusting your
-                  own programs.
+                  own programs. Some real <http://tinyurl.com/paranoidpeople>
+                  prefer writing there software in one of the most insecure
+                  programming languages and perform security audits by hand,
+                  I'd rather have my compiler do the job. (Anyone who wants to
+                  audit this library is more than welcome!)
 
 Synopsis:         Jailed IO monad.
 Category:         System, Security

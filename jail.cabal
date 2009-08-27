@@ -1,5 +1,5 @@
 Name:             jail
-Version:          0.0.1
+Version:          0.0.1.1
 Description:
 
                   Like all of us know, the IO monad from the System.IO module

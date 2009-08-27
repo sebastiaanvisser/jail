@@ -56,7 +56,7 @@ Description:
                   own programs.
 
 Synopsis:         Jailed IO monad.
-Category:         Sysetm, Security
+Category:         System, Security
 Cabal-Version:    >= 1.6
 License:          BSD3
 License-file:     LICENSE

@@ -147,8 +147,14 @@ module System.IO.Jail
 where
 
 import Control.Applicative
+import Control.Monad.Cont
+import Control.Monad.Error
+import Control.Monad.Trans.Identity
+import Control.Monad.List
+import Control.Monad.RWS
 import Control.Monad.Reader
 import Control.Monad.State
+import Control.Monad.Writer
 import Data.List
 import Data.Set (Set)
 import Data.Typeable
@@ -177,13 +183,22 @@ instance Ord HandleS where
 newtype IO a = IO { unJail :: ReaderT (Maybe FilePath) (StateT (Set HandleS) U.IO) a}
   deriving (Functor, Applicative, Monad, Typeable, MonadFix)
 
--- | Like `MoandIO`, but for jailed computations.
+-- | Like `MonadIO`, but for jailed computations.
 
 class Monad m => JailIO m where
   jailIO :: IO a -> m a
 
 instance JailIO IO where
   jailIO = id
+
+instance            JailIO m  => JailIO (ContT     r     m) where jailIO = lift . jailIO
+instance (Error e,  JailIO m) => JailIO (ErrorT    e     m) where jailIO = lift . jailIO
+instance            JailIO m  => JailIO (IdentityT       m) where jailIO = lift . jailIO
+instance            JailIO m  => JailIO (ListT           m) where jailIO = lift . jailIO
+instance (Monoid w, JailIO m) => JailIO (RWST      r w s m) where jailIO = lift . jailIO
+instance            JailIO m  => JailIO (ReaderT   r     m) where jailIO = lift . jailIO
+instance            JailIO m  => JailIO (StateT    r     m) where jailIO = lift . jailIO
+instance (Monoid r, JailIO m) => JailIO (WriterT   r     m) where jailIO = lift . jailIO
 
 {- |
 Run a jailed IO computation. The IO computation will be able to access all

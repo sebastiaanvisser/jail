@@ -4,7 +4,6 @@ module System.IO.Jail
 
     IO,                        -- instance MonadFix
     run,
-    JailIO (..),
 
     -- * Files and handles
 
@@ -143,27 +142,33 @@ module System.IO.Jail
 
     openTempFile,
     openBinaryTempFile,
+
+    ioError,
+    catch,
+    try,
+    modifyIOError
   )
 where
 
 import Control.Applicative
 import Control.Monad.Cont
 import Control.Monad.Error
-import Control.Monad.Trans.Identity
-import Control.Monad.List
+-- import Control.Monad.Trans.Identity
+-- import Control.Monad.List
 import Control.Monad.RWS
 import Control.Monad.Reader
 import Control.Monad.State
-import Control.Monad.Writer
+-- import Control.Monad.Writer
 import Data.List
 import Data.Set (Set)
 import Data.Typeable
 import Foreign.Ptr
-import Prelude hiding (readFile, writeFile, print, appendFile, IO, getChar, getLine, getContents, readIO, readLn, interact, putChar, putStr, putStrLn)
+import Prelude hiding (readFile, writeFile, print, appendFile, IO, getChar, getLine, getContents, readIO, readLn, interact, putChar, putStr, putStrLn, ioError, catch)
 import System.Directory
 import System.IO (IOMode, Handle, BufferMode, HandlePosn, SeekMode, stdin, stdout, stderr)
 import qualified Data.Set as Set
 import qualified System.IO as U
+import qualified System.IO.Error as E
 
 -- Make `Handle's orderable.
 
@@ -182,23 +187,6 @@ instance Ord HandleS where
 
 newtype IO a = IO { unJail :: ReaderT (Maybe FilePath) (StateT (Set HandleS) U.IO) a}
   deriving (Functor, Applicative, Monad, Typeable, MonadFix)
-
--- | Like `MonadIO`, but for jailed computations.
-
-class Monad m => JailIO m where
-  jailIO :: IO a -> m a
-
-instance JailIO IO where
-  jailIO = id
-
-instance            JailIO m  => JailIO (ContT     r     m) where jailIO = lift . jailIO
-instance (Error e,  JailIO m) => JailIO (ErrorT    e     m) where jailIO = lift . jailIO
-instance            JailIO m  => JailIO (IdentityT       m) where jailIO = lift . jailIO
-instance            JailIO m  => JailIO (ListT           m) where jailIO = lift . jailIO
-instance (Monoid w, JailIO m) => JailIO (RWST      r w s m) where jailIO = lift . jailIO
-instance            JailIO m  => JailIO (ReaderT   r     m) where jailIO = lift . jailIO
-instance            JailIO m  => JailIO (StateT    r     m) where jailIO = lift . jailIO
-instance (Monoid r, JailIO m) => JailIO (WriterT   r     m) where jailIO = lift . jailIO
 
 {- |
 Run a jailed IO computation. The IO computation will be able to access all
@@ -226,6 +214,11 @@ runRaw p h =
 
 isSubPathOf :: FilePath -> FilePath -> U.IO Bool
 isSubPathOf path jail = isPrefixOf <$> canonicalizePath jail <*> canonicalizePath path
+
+-- Create 
+
+mkCallback :: IO (IO a -> U.IO a)
+mkCallback = runRaw <$> IO ask <*> IO (lift get) 
 
 -- Unconditionally, embed an IO action into the Jail monad. Not to be exported!
 
@@ -272,7 +265,7 @@ embedHandle name action handle = embedHandles name (action . head) [handle]
 
 withFile :: FilePath -> IOMode -> (Handle -> IO a) -> IO a
 withFile f m w =
-  do r <- runRaw <$> IO ask <*> IO (lift get)
+  do r <- mkCallback
      embedPath "withFile" (\f' -> U.withFile f' m (\h -> r (allow h >> w h))) f
 
 openFile :: FilePath -> IOMode -> IO Handle
@@ -493,3 +486,22 @@ openTempFile f s = embedPath "openTempFile" (flip U.openTempFile s) f
 openBinaryTempFile :: FilePath -> String -> IO (FilePath, Handle) 
 openBinaryTempFile f s = embedPath "openBinaryTempFile" (flip U.openBinaryTempFile s) f
 
+--
+
+ioError :: IOError -> IO a
+ioError = io . E.ioError
+
+catch :: IO a -> (IOError -> IO a) -> IO a
+catch a c =
+  do r <- mkCallback
+     io (E.catch (r a) (r . c))
+
+try :: IO a -> IO (Either IOError a)
+try a = 
+  do r <- mkCallback
+     io (E.try (r a))
+
+modifyIOError :: (IOError -> IOError) -> IO a -> IO a
+modifyIOError f a =
+  do r <- mkCallback
+     io (E.modifyIOError f (r a))

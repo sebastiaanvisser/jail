@@ -72,4 +72,5 @@ Build-Depends:    base >= 3 && <= 5, containers ==0.2.*, directory ==1.0.*, mona
 GHC-Options:      -Wall
 HS-Source-Dirs:   src
 Exposed-modules:  System.IO.Jail
+                  System.IO.MonadJail
 

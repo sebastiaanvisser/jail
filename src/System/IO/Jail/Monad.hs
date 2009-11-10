@@ -1,5 +1,5 @@
 {-# LANGUAGE CPP #-}
-module System.IO.MonadJail where
+module System.IO.Jail.Monad where
 
 import Control.Monad.Cont
 import Control.Monad.Error

@@ -67,7 +67,7 @@ License-file:     LICENSE
 Author:           Sebastiaan Visser
 Maintainer:       sfvisser@cs.uu.nl
 Build-Type:       Simple
-Build-Depends:    base >= 3 && <= 5, containers ==0.2.*, directory ==1.0.*, monads-fd ==0.0.*, transformers ==0.1.*
+Build-Depends:    base >= 3 && <= 5, containers ==0.2.*, directory ==1.0.*, monads-fd ==0.0.*, transformers ==0.1.*, old-time ==1.0.*
 
 GHC-Options:      -Wall
 HS-Source-Dirs:   src

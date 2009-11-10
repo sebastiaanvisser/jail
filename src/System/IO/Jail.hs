@@ -1,265 +1,198 @@
 {-# LANGUAGE CPP, GeneralizedNewtypeDeriving, DeriveDataTypeable #-}
 module System.IO.Jail
-  ( -- * The IO monad
+( -- * The IO monad
 
-    IO,                        -- instance MonadFix
-    run,
+  IO,                        -- instance MonadFix
+  run,
 
-    -- * Files and handles
+  -- * Files and handles
 
-    FilePath,                  -- :: String
+  FilePath,                  -- :: String
 
-    Handle,             -- abstract, instance of: Eq, Show.
+  Handle,             -- abstract, instance of: Eq, Show.
 
-    -- | Three handles are allocated during program initialisation,
-    -- and are initially open.
+  -- | Three handles are allocated during program initialisation,
+  -- and are initially open.
 
-    stdin, stdout, stderr,     -- :: Handle
+  stdin, stdout, stderr,     -- :: Handle
 
-    -- * Opening and closing files
+  -- * Opening and closing files
 
-    -- ** Opening files
+  -- ** Opening files
 
-    withFile,
-    openFile,                  -- :: FilePath -> IOMode -> IO Handle
-    IOMode(ReadMode,WriteMode,AppendMode,ReadWriteMode),
+  withFile,
+  openFile,                  -- :: FilePath -> IOMode -> IO Handle
+  IOMode(ReadMode,WriteMode,AppendMode,ReadWriteMode),
 
-    -- ** Closing files
+  -- ** Closing files
 
-    hClose,                    -- :: Handle -> IO ()
+  hClose,                    -- :: Handle -> IO ()
 
-    -- ** Special cases
+  -- ** Special cases
 
-    readFile,                  -- :: FilePath -> IO String
-    writeFile,                 -- :: FilePath -> String -> IO ()
-    appendFile,                -- :: FilePath -> String -> IO ()
+  readFile,                  -- :: FilePath -> IO String
+  writeFile,                 -- :: FilePath -> String -> IO ()
+  appendFile,                -- :: FilePath -> String -> IO ()
 
-    -- ** File locking
+  -- ** File locking
 
-    -- $locking
+  -- $locking
 
-    -- * Operations on handles
+  -- * Operations on handles
 
-    -- ** Determining and changing the size of a file
+  -- ** Determining and changing the size of a file
 
-    hFileSize,                 -- :: Handle -> IO Integer
-
-#ifdef __GLASGOW_HASKELL__
-    hSetFileSize,              -- :: Handle -> Integer -> IO ()
-#endif
-
-    -- ** Detecting the end of input
-
-    hIsEOF,                    -- :: Handle -> IO Bool
-    isEOF,                     -- :: IO Bool
-
-    -- ** Buffering operations
-
-    BufferMode(NoBuffering,LineBuffering,BlockBuffering),
-    hSetBuffering,             -- :: Handle -> BufferMode -> IO ()
-    hGetBuffering,             -- :: Handle -> IO BufferMode
-    hFlush,                    -- :: Handle -> IO ()
-
-    -- ** Repositioning handles
-
-    hGetPosn,                  -- :: Handle -> IO HandlePosn
-    hSetPosn,                  -- :: HandlePosn -> IO ()
-    HandlePosn,                -- abstract, instance of: Eq, Show.
-
-    hSeek,                     -- :: Handle -> SeekMode -> Integer -> IO ()
-    SeekMode(AbsoluteSeek,RelativeSeek,SeekFromEnd),
-
-#if !defined(__NHC__)
-    hTell,                     -- :: Handle -> IO Integer
-#endif
-
-    -- ** Handle properties
-
-    hIsOpen, hIsClosed,        -- :: Handle -> IO Bool
-    hIsReadable, hIsWritable,  -- :: Handle -> IO Bool
-    hIsSeekable,               -- :: Handle -> IO Bool
-
-    -- ** Terminal operations (not portable: GHC\/Hugs only)
-
-#if !defined(__NHC__)
-    hIsTerminalDevice,          -- :: Handle -> IO Bool
-
-    hSetEcho,                   -- :: Handle -> Bool -> IO ()
-    hGetEcho,                   -- :: Handle -> IO Bool
-#endif
-
-    -- ** Showing handle state (not portable: GHC only)
+  hFileSize,                 -- :: Handle -> IO Integer
 
 #ifdef __GLASGOW_HASKELL__
-    hShow,                      -- :: Handle -> IO String
+  hSetFileSize,              -- :: Handle -> Integer -> IO ()
 #endif
 
-    -- * Text input and output
+  -- ** Detecting the end of input
 
-    -- ** Text input
+  hIsEOF,                    -- :: Handle -> IO Bool
+  isEOF,                     -- :: IO Bool
 
-    hWaitForInput,             -- :: Handle -> Int -> IO Bool
-    hReady,                    -- :: Handle -> IO Bool
-    hGetChar,                  -- :: Handle -> IO Char
-    hGetLine,                  -- :: Handle -> IO [Char]
-    hLookAhead,                -- :: Handle -> IO Char
-    hGetContents,              -- :: Handle -> IO [Char]
+  -- ** Buffering operations
 
-    -- ** Text output
+  BufferMode(NoBuffering,LineBuffering,BlockBuffering),
+  hSetBuffering,             -- :: Handle -> BufferMode -> IO ()
+  hGetBuffering,             -- :: Handle -> IO BufferMode
+  hFlush,                    -- :: Handle -> IO ()
 
-    hPutChar,                  -- :: Handle -> Char -> IO ()
-    hPutStr,                   -- :: Handle -> [Char] -> IO ()
-    hPutStrLn,                 -- :: Handle -> [Char] -> IO ()
-    hPrint,                    -- :: Show a => Handle -> a -> IO ()
+  -- ** Repositioning handles
 
-    -- ** Special cases for standard input and output
+  hGetPosn,                  -- :: Handle -> IO HandlePosn
+  hSetPosn,                  -- :: HandlePosn -> IO ()
+  HandlePosn,                -- abstract, instance of: Eq, Show.
 
-    interact,                  -- :: (String -> String) -> IO ()
-    putChar,                   -- :: Char   -> IO ()
-    putStr,                    -- :: String -> IO () 
-    putStrLn,                  -- :: String -> IO ()
-    print,                     -- :: Show a => a -> IO ()
-    getChar,                   -- :: IO Char
-    getLine,                   -- :: IO String
-    getContents,               -- :: IO String
-    readIO,                    -- :: Read a => String -> IO a
-    readLn,                    -- :: Read a => IO a
+  hSeek,                     -- :: Handle -> SeekMode -> Integer -> IO ()
+  SeekMode(AbsoluteSeek,RelativeSeek,SeekFromEnd),
 
-    -- * Binary input and output
+#if !defined(__NHC__)
+  hTell,                     -- :: Handle -> IO Integer
+#endif
 
-    withBinaryFile,
-    openBinaryFile,            -- :: FilePath -> IOMode -> IO Handle
-    hSetBinaryMode,            -- :: Handle -> Bool -> IO ()
-    hPutBuf,                   -- :: Handle -> Ptr a -> Int -> IO ()
-    hGetBuf,                   -- :: Handle -> Ptr a -> Int -> IO Int
+  -- ** Handle properties
+
+  hIsOpen, hIsClosed,        -- :: Handle -> IO Bool
+  hIsReadable, hIsWritable,  -- :: Handle -> IO Bool
+  hIsSeekable,               -- :: Handle -> IO Bool
+
+  -- ** Terminal operations (not portable: GHC\/Hugs only)
+
+#if !defined(__NHC__)
+  hIsTerminalDevice,          -- :: Handle -> IO Bool
+
+  hSetEcho,                   -- :: Handle -> Bool -> IO ()
+  hGetEcho,                   -- :: Handle -> IO Bool
+#endif
+
+  -- ** Showing handle state (not portable: GHC only)
+
+#ifdef __GLASGOW_HASKELL__
+  hShow,                      -- :: Handle -> IO String
+#endif
+
+  -- * Text input and output
+
+  -- ** Text input
+
+  hWaitForInput,             -- :: Handle -> Int -> IO Bool
+  hReady,                    -- :: Handle -> IO Bool
+  hGetChar,                  -- :: Handle -> IO Char
+  hGetLine,                  -- :: Handle -> IO [Char]
+  hLookAhead,                -- :: Handle -> IO Char
+  hGetContents,              -- :: Handle -> IO [Char]
+
+  -- ** Text output
+
+  hPutChar,                  -- :: Handle -> Char -> IO ()
+  hPutStr,                   -- :: Handle -> [Char] -> IO ()
+  hPutStrLn,                 -- :: Handle -> [Char] -> IO ()
+  hPrint,                    -- :: Show a => Handle -> a -> IO ()
+
+  -- ** Special cases for standard input and output
+
+  interact,                  -- :: (String -> String) -> IO ()
+  putChar,                   -- :: Char   -> IO ()
+  putStr,                    -- :: String -> IO () 
+  putStrLn,                  -- :: String -> IO ()
+  print,                     -- :: Show a => a -> IO ()
+  getChar,                   -- :: IO Char
+  getLine,                   -- :: IO String
+  getContents,               -- :: IO String
+  readIO,                    -- :: Read a => String -> IO a
+  readLn,                    -- :: Read a => IO a
+
+  -- * Binary input and output
+
+  withBinaryFile,
+  openBinaryFile,            -- :: FilePath -> IOMode -> IO Handle
+  hSetBinaryMode,            -- :: Handle -> Bool -> IO ()
+  hPutBuf,                   -- :: Handle -> Ptr a -> Int -> IO ()
+  hGetBuf,                   -- :: Handle -> Ptr a -> Int -> IO Int
 
 #if !defined(__NHC__) && !defined(__HUGS__)
-    hPutBufNonBlocking,        -- :: Handle -> Ptr a -> Int -> IO Int
-    hGetBufNonBlocking,        -- :: Handle -> Ptr a -> Int -> IO Int
+  hPutBufNonBlocking,        -- :: Handle -> Ptr a -> Int -> IO Int
+  hGetBufNonBlocking,        -- :: Handle -> Ptr a -> Int -> IO Int
 #endif
 
-    -- * Temporary files
+  -- * Temporary files
 
-    openTempFile,
-    openBinaryTempFile,
+  openTempFile,
+  openBinaryTempFile,
 
-    ioError,
-    catch,
-    try,
-    modifyIOError
-  )
+  -- * from System.IO.Error
+
+  ioError,
+  catch,
+  try,
+  modifyIOError,
+
+  -- * from System.Directory
+
+  createDirectory,
+  createDirectoryIfMissing,
+  removeDirectory,
+  removeDirectoryRecursive,
+  renameDirectory,
+  getDirectoryContents,
+  getCurrentDirectory,
+  setCurrentDirectory,
+  getHomeDirectory,
+  getAppUserDataDirectory,
+  getUserDocumentsDirectory,
+  getTemporaryDirectory,
+  removeFile,
+  renameFile,
+  copyFile,
+  canonicalizePath,
+  makeRelativeToCurrentDirectory,
+  findExecutable,
+  doesFileExist,
+  doesDirectoryExist,
+  getPermissions,
+  setPermissions,
+  getModificationTime,
+
+  timeout
+)
 where
 
 import Control.Applicative
 import Control.Monad.Cont
-import Control.Monad.Error
--- import Control.Monad.Trans.Identity
--- import Control.Monad.List
-import Control.Monad.RWS
 import Control.Monad.Reader
 import Control.Monad.State
--- import Control.Monad.Writer
-import Data.List
-import Data.Set (Set)
-import Data.Typeable
 import Foreign.Ptr
 import Prelude hiding (readFile, writeFile, print, appendFile, IO, getChar, getLine, getContents, readIO, readLn, interact, putChar, putStr, putStrLn, ioError, catch)
-import System.Directory
 import System.IO (IOMode, Handle, BufferMode, HandlePosn, SeekMode, stdin, stdout, stderr)
-import qualified Data.Set as Set
+import System.IO.Jail.Unsafe
+import System.Time (ClockTime)
+import qualified System.Directory as D
 import qualified System.IO as U
 import qualified System.IO.Error as E
-
--- Make `Handle's orderable.
-
-data HandleS = HandleS String Handle
-
-mkHWrap :: Handle -> HandleS
-mkHWrap h = HandleS (show h) h
-
-instance Eq HandleS where
-  (HandleS _ s) == (HandleS _ t) = s == t
-
-instance Ord HandleS where
-  (HandleS s _) `compare` (HandleS t _) = s `compare` t
-
--- | The jailed IO monad.
-
-newtype IO a = IO { unJail :: ReaderT (Maybe FilePath) (StateT (Set HandleS) U.IO) a}
-  deriving (Functor, Applicative, Monad, Typeable, MonadFix)
-
-{- |
-Run a jailed IO computation. The IO computation will be able to access all
-files that are within the specified jail directory. All file accesses outside
-the jail directory will be refused. Only file handles opened from within the
-jailed computation and the handles from the white list will be accessible to
-the operations requiring a file handle. No smuggling in of foreign handles,
-border patrol is very strict. When the jail path is specified as `Nothing' no
-file access will be possible at all, this means the computation can only rely
-on the white listed handles.
--}
-
-run
-  :: Maybe FilePath  -- ^ The jail directory or `Nothing' for not allowing file access.
-  -> [Handle]        -- ^ A white list of handles that are always accessible.
-  -> IO a            -- ^ The jailed IO computation to run.
-  -> U.IO a          -- ^ Run the computation from within the insecure real world.
-run jail = runRaw jail . Set.fromList . map mkHWrap
-
-runRaw :: Maybe FilePath -> Set HandleS -> IO a -> U.IO a
-runRaw p h =
-    flip evalStateT h
-  . flip runReaderT p
-  . unJail
-
-isSubPathOf :: FilePath -> FilePath -> U.IO Bool
-isSubPathOf path jail = isPrefixOf <$> canonicalizePath jail <*> canonicalizePath path
-
--- Create 
-
-mkCallback :: IO (IO a -> U.IO a)
-mkCallback = runRaw <$> IO ask <*> IO (lift get) 
-
--- Unconditionally, embed an IO action into the Jail monad. Not to be exported!
-
-io :: U.IO a -> IO a
-io = IO . liftIO
-
--- Allow a new Handle.
-
-allow :: Handle -> IO ()
-allow h = (IO . lift) (modify (Set.insert (mkHWrap h)))
-
-{-
-Embed an IO action that takes a FilePath as input. The IO action will only
-executed when the path is within the jail directory. Not to be exported!
--}
-
-embedPath :: String -> (FilePath -> U.IO a) -> FilePath -> IO a
-embedPath name action path = 
-  do jail <- IO ask 
-     safe <- io (maybe (return False) (path `isSubPathOf`) jail)
-     if safe
-       then io (action path)
-       else error (name ++ ": Permission denied, filepath outside jailed environment. "
-                  ++ show path)
-
-{-
-Embed an IO action that takes a `Handle' as input. The IO action will only
-executed when the handle is opened from within the jailed IO monad. Not to be
-exported!
--}
-
-embedHandles :: String -> ([Handle] -> U.IO a) -> [Handle] -> IO a
-embedHandles name action handles = 
-  do set <- IO (lift get)
-     if all (\h -> mkHWrap h `Set.member` set) handles
-       then io (action handles)
-       else error (name ++ ": Permission denied, handle from outside jailed environment. "
-                  ++ show handles)
-
-embedHandle :: String -> (Handle -> U.IO a) -> Handle -> IO a
-embedHandle name action handle = embedHandles name (action . head) [handle]
+import qualified System.Timeout as T
 
 -- Embedded IO actions.
 
@@ -486,7 +419,7 @@ openTempFile f s = embedPath "openTempFile" (flip U.openTempFile s) f
 openBinaryTempFile :: FilePath -> String -> IO (FilePath, Handle) 
 openBinaryTempFile f s = embedPath "openBinaryTempFile" (flip U.openBinaryTempFile s) f
 
---
+---- System.IO.Error
 
 ioError :: IOError -> IO a
 ioError = io . E.ioError
@@ -505,3 +438,82 @@ modifyIOError :: (IOError -> IOError) -> IO a -> IO a
 modifyIOError f a =
   do r <- mkCallback
      io (E.modifyIOError f (r a))
+
+---- System.Directory
+
+createDirectory :: FilePath -> IO ()
+createDirectory = embedPath "createDirectory" D.createDirectory 
+
+createDirectoryIfMissing :: Bool -> FilePath -> IO ()
+createDirectoryIfMissing b = embedPath "createDirectoryIfMissing" (D.createDirectoryIfMissing b)
+
+removeDirectory :: FilePath -> IO ()
+removeDirectory = embedPath "removeDirectory" D.removeDirectory 
+
+removeDirectoryRecursive :: FilePath -> IO ()
+removeDirectoryRecursive = embedPath "removeDirectoryRecursive" D.removeDirectoryRecursive 
+
+renameDirectory :: FilePath -> FilePath -> IO ()
+renameDirectory a b = embedPaths "renameDirectory" (\[c, d] -> D.renameDirectory c d) [a, b]
+
+getDirectoryContents :: FilePath -> IO [FilePath]
+getDirectoryContents = embedPath "getDirectoryContents" D.getDirectoryContents 
+
+getCurrentDirectory :: IO FilePath
+getCurrentDirectory = io D.getCurrentDirectory 
+
+setCurrentDirectory :: FilePath -> IO ()
+setCurrentDirectory = embedPath "setCurrentDirectory" D.setCurrentDirectory 
+
+getHomeDirectory :: IO FilePath
+getHomeDirectory = io D.getHomeDirectory 
+
+getAppUserDataDirectory :: String -> IO FilePath
+getAppUserDataDirectory = embedPath "getAppUserDataDirectory" D.getAppUserDataDirectory 
+
+getUserDocumentsDirectory :: IO FilePath
+getUserDocumentsDirectory = io D.getUserDocumentsDirectory 
+
+getTemporaryDirectory :: IO FilePath
+getTemporaryDirectory = io D.getTemporaryDirectory 
+
+removeFile :: FilePath -> IO ()
+removeFile = embedPath "removeFile" D.removeFile 
+
+renameFile :: FilePath -> FilePath -> IO ()
+renameFile a b = embedPaths "renameFile" (\[f, g] -> D.renameFile f g) [a, b]
+
+copyFile :: FilePath -> FilePath -> IO ()
+copyFile a b = embedPaths "copyFile" (\[f, g] -> D.copyFile f g) [a, b]
+
+canonicalizePath :: FilePath -> IO FilePath
+canonicalizePath = embedPath "canonicalizePath" D.canonicalizePath 
+
+makeRelativeToCurrentDirectory :: FilePath -> IO FilePath
+makeRelativeToCurrentDirectory = embedPath "makeRelativeToCurrentDirectory" D.makeRelativeToCurrentDirectory 
+
+findExecutable :: String -> IO (Maybe FilePath)
+findExecutable = io . D.findExecutable 
+
+doesFileExist :: FilePath -> IO Bool
+doesFileExist = embedPath "doesFileExist" D.doesFileExist 
+
+doesDirectoryExist :: FilePath -> IO Bool
+doesDirectoryExist = embedPath "doesDirectoryExist" D.doesDirectoryExist 
+
+getPermissions :: FilePath -> IO D.Permissions
+getPermissions = embedPath "getPermissions" D.getPermissions 
+
+setPermissions :: FilePath -> D.Permissions -> IO ()
+setPermissions f p = embedPath "setPermissions" (flip D.setPermissions p) f
+
+getModificationTime :: FilePath -> IO ClockTime
+getModificationTime = embedPath "getModificationTime" D.getModificationTime 
+
+---- System.Timeout
+
+timeout :: Int -> IO a -> IO (Maybe a)
+timeout i a =
+  do r <- mkCallback
+     io (T.timeout i (r a))
+

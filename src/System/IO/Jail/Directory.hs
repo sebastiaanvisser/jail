@@ -1,4 +1,4 @@
-module System.IO.Jail
+module System.IO.Jail.Directory
 ( createDirectory
 , createDirectoryIfMissing
 , removeDirectory

@@ -142,41 +142,6 @@ module System.IO.Jail
 
   openTempFile,
   openBinaryTempFile,
-
-  -- * from System.IO.Error
-
-  ioError,
-  catch,
-  try,
-  modifyIOError,
-
-  -- * from System.Directory
-
-  createDirectory,
-  createDirectoryIfMissing,
-  removeDirectory,
-  removeDirectoryRecursive,
-  renameDirectory,
-  getDirectoryContents,
-  getCurrentDirectory,
-  setCurrentDirectory,
-  getHomeDirectory,
-  getAppUserDataDirectory,
-  getUserDocumentsDirectory,
-  getTemporaryDirectory,
-  removeFile,
-  renameFile,
-  copyFile,
-  canonicalizePath,
-  makeRelativeToCurrentDirectory,
-  findExecutable,
-  doesFileExist,
-  doesDirectoryExist,
-  getPermissions,
-  setPermissions,
-  getModificationTime,
-
-  timeout
 )
 where
 
@@ -188,11 +153,7 @@ import Foreign.Ptr
 import Prelude hiding (readFile, writeFile, print, appendFile, IO, getChar, getLine, getContents, readIO, readLn, interact, putChar, putStr, putStrLn, ioError, catch)
 import System.IO (IOMode, Handle, BufferMode, HandlePosn, SeekMode, stdin, stdout, stderr)
 import System.IO.Jail.Unsafe
-import System.Time (ClockTime)
-import qualified System.Directory as D
 import qualified System.IO as U
-import qualified System.IO.Error as E
-import qualified System.Timeout as T
 
 -- Embedded IO actions.
 
@@ -418,102 +379,4 @@ openTempFile f s = embedPath "openTempFile" (flip U.openTempFile s) f
 
 openBinaryTempFile :: FilePath -> String -> IO (FilePath, Handle) 
 openBinaryTempFile f s = embedPath "openBinaryTempFile" (flip U.openBinaryTempFile s) f
-
----- System.IO.Error
-
-ioError :: IOError -> IO a
-ioError = io . E.ioError
-
-catch :: IO a -> (IOError -> IO a) -> IO a
-catch a c =
-  do r <- mkCallback
-     io (E.catch (r a) (r . c))
-
-try :: IO a -> IO (Either IOError a)
-try a = 
-  do r <- mkCallback
-     io (E.try (r a))
-
-modifyIOError :: (IOError -> IOError) -> IO a -> IO a
-modifyIOError f a =
-  do r <- mkCallback
-     io (E.modifyIOError f (r a))
-
----- System.Directory
-
-createDirectory :: FilePath -> IO ()
-createDirectory = embedPath "createDirectory" D.createDirectory 
-
-createDirectoryIfMissing :: Bool -> FilePath -> IO ()
-createDirectoryIfMissing b = embedPath "createDirectoryIfMissing" (D.createDirectoryIfMissing b)
-
-removeDirectory :: FilePath -> IO ()
-removeDirectory = embedPath "removeDirectory" D.removeDirectory 
-
-removeDirectoryRecursive :: FilePath -> IO ()
-removeDirectoryRecursive = embedPath "removeDirectoryRecursive" D.removeDirectoryRecursive 
-
-renameDirectory :: FilePath -> FilePath -> IO ()
-renameDirectory a b = embedPaths "renameDirectory" (\[c, d] -> D.renameDirectory c d) [a, b]
-
-getDirectoryContents :: FilePath -> IO [FilePath]
-getDirectoryContents = embedPath "getDirectoryContents" D.getDirectoryContents 
-
-getCurrentDirectory :: IO FilePath
-getCurrentDirectory = io D.getCurrentDirectory 
-
-setCurrentDirectory :: FilePath -> IO ()
-setCurrentDirectory = embedPath "setCurrentDirectory" D.setCurrentDirectory 
-
-getHomeDirectory :: IO FilePath
-getHomeDirectory = io D.getHomeDirectory 
-
-getAppUserDataDirectory :: String -> IO FilePath
-getAppUserDataDirectory = embedPath "getAppUserDataDirectory" D.getAppUserDataDirectory 
-
-getUserDocumentsDirectory :: IO FilePath
-getUserDocumentsDirectory = io D.getUserDocumentsDirectory 
-
-getTemporaryDirectory :: IO FilePath
-getTemporaryDirectory = io D.getTemporaryDirectory 
-
-removeFile :: FilePath -> IO ()
-removeFile = embedPath "removeFile" D.removeFile 
-
-renameFile :: FilePath -> FilePath -> IO ()
-renameFile a b = embedPaths "renameFile" (\[f, g] -> D.renameFile f g) [a, b]
-
-copyFile :: FilePath -> FilePath -> IO ()
-copyFile a b = embedPaths "copyFile" (\[f, g] -> D.copyFile f g) [a, b]
-
-canonicalizePath :: FilePath -> IO FilePath
-canonicalizePath = embedPath "canonicalizePath" D.canonicalizePath 
-
-makeRelativeToCurrentDirectory :: FilePath -> IO FilePath
-makeRelativeToCurrentDirectory = embedPath "makeRelativeToCurrentDirectory" D.makeRelativeToCurrentDirectory 
-
-findExecutable :: String -> IO (Maybe FilePath)
-findExecutable = io . D.findExecutable 
-
-doesFileExist :: FilePath -> IO Bool
-doesFileExist = embedPath "doesFileExist" D.doesFileExist 
-
-doesDirectoryExist :: FilePath -> IO Bool
-doesDirectoryExist = embedPath "doesDirectoryExist" D.doesDirectoryExist 
-
-getPermissions :: FilePath -> IO D.Permissions
-getPermissions = embedPath "getPermissions" D.getPermissions 
-
-setPermissions :: FilePath -> D.Permissions -> IO ()
-setPermissions f p = embedPath "setPermissions" (flip D.setPermissions p) f
-
-getModificationTime :: FilePath -> IO ClockTime
-getModificationTime = embedPath "getModificationTime" D.getModificationTime 
-
----- System.Timeout
-
-timeout :: Int -> IO a -> IO (Maybe a)
-timeout i a =
-  do r <- mkCallback
-     io (T.timeout i (r a))
 

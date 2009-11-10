@@ -67,10 +67,21 @@ License-file:     LICENSE
 Author:           Sebastiaan Visser
 Maintainer:       sfvisser@cs.uu.nl
 Build-Type:       Simple
-Build-Depends:    base >= 3 && <= 5, containers ==0.2.*, directory ==1.0.*, monads-fd ==0.0.*, transformers ==0.1.*, old-time ==1.0.*
+Build-Depends:    base >= 3 && <= 5,
+                  containers ==0.2.*,
+                  directory ==1.0.*,
+                  monads-fd ==0.0.*,
+                  transformers ==0.1.*,
+                  old-time ==1.0.*,
+                  bytestring ==0.9.*
 
 GHC-Options:      -Wall
 HS-Source-Dirs:   src
 Exposed-modules:  System.IO.Jail
-                  System.IO.MonadJail
+                  System.IO.Jail.Monad
+                  System.IO.Jail.ByteString
+                  System.IO.Jail.ByteString.Lazy
+                  System.IO.Jail.Directory
+                  System.IO.Jail.Error
+                  System.IO.Jail.Timeout
 
